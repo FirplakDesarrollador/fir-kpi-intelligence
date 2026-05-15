@@ -1,26 +1,266 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ------------------------------------------------------------------ */
+/*  FIRPLAK brand palette (single source of truth)                    */
+/* ------------------------------------------------------------------ */
+:root {
+  --firplak-navy: #254153;
+  --firplak-blue-gray: #749094;
+  --firplak-black: #1d1d1b;
+  --firplak-warm-white: #f5f1ea;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Light mode — warm off-white base, navy accents                    */
+/* ------------------------------------------------------------------ */
+:root {
+  --background: var(--firplak-warm-white);
+  --foreground: var(--firplak-black);
+
+  /* Surfaces — slightly lifted off the cream base for liquid glass */
+  --card: oklch(0.985 0.008 85);
+  --card-foreground: var(--firplak-black);
+  --popover: oklch(0.985 0.008 85);
+  --popover-foreground: var(--firplak-black);
+
+  --primary: var(--firplak-navy);
+  --primary-foreground: var(--firplak-warm-white);
+
+  --secondary: oklch(0.93 0.01 85);
+  --secondary-foreground: var(--firplak-navy);
+
+  --muted: oklch(0.93 0.01 85);
+  --muted-foreground: oklch(0.48 0.02 215); /* warm blue-gray text */
+
+  --accent: oklch(0.93 0.01 85);
+  --accent-foreground: var(--firplak-navy);
+
+  --destructive: oklch(0.55 0.2 25);
+
+  --border: oklch(0.86 0.012 85);
+  --input: oklch(0.86 0.012 85);
+  --ring: var(--firplak-blue-gray);
+
+  /* Chart palette — FIRPLAK-led, with restrained warm and cool accents */
+  --chart-1: var(--firplak-navy);
+  --chart-2: var(--firplak-blue-gray);
+  --chart-3: oklch(0.55 0.04 220);
+  --chart-4: oklch(0.78 0.09 70);
+  --chart-5: oklch(0.62 0.08 200);
+
+  --radius: 0.75rem;
+
+  /* Sidebar — slightly cooler off-white for separation from main canvas */
+  --sidebar: oklch(0.97 0.01 85);
+  --sidebar-foreground: var(--firplak-black);
+  --sidebar-primary: var(--firplak-navy);
+  --sidebar-primary-foreground: var(--firplak-warm-white);
+  --sidebar-accent: oklch(0.93 0.01 85);
+  --sidebar-accent-foreground: var(--firplak-navy);
+  --sidebar-border: oklch(0.86 0.012 85);
+  --sidebar-ring: var(--firplak-blue-gray);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Dark mode — FIRPLAK black base, lifted navy surfaces              */
+/* ------------------------------------------------------------------ */
+.dark {
+  --background: var(--firplak-black);
+  --foreground: var(--firplak-warm-white);
+
+  --card: oklch(0.24 0.008 95);
+  --card-foreground: var(--firplak-warm-white);
+  --popover: oklch(0.26 0.008 95);
+  --popover-foreground: var(--firplak-warm-white);
+
+  /* On dark, primary becomes a high-contrast cream for buttons,
+     while brand identity is carried by the lighter navy in charts. */
+  --primary: var(--firplak-warm-white);
+  --primary-foreground: var(--firplak-navy);
+
+  --secondary: oklch(0.30 0.015 215);
+  --secondary-foreground: var(--firplak-warm-white);
+
+  --muted: oklch(0.28 0.012 215);
+  --muted-foreground: oklch(0.72 0.018 215);
+
+  --accent: oklch(0.30 0.015 215);
+  --accent-foreground: var(--firplak-warm-white);
+
+  --destructive: oklch(0.70 0.19 25);
+
+  --border: oklch(0.97 0.012 85 / 8%);
+  --input: oklch(0.97 0.012 85 / 12%);
+  --ring: var(--firplak-blue-gray);
+
+  /* Lift the navy so it remains readable on a near-black canvas. */
+  --chart-1: oklch(0.68 0.07 232);
+  --chart-2: var(--firplak-blue-gray);
+  --chart-3: oklch(0.72 0.05 215);
+  --chart-4: oklch(0.82 0.10 70);
+  --chart-5: oklch(0.62 0.08 200);
+
+  --sidebar: oklch(0.22 0.008 95);
+  --sidebar-foreground: var(--firplak-warm-white);
+  --sidebar-primary: oklch(0.68 0.07 232);
+  --sidebar-primary-foreground: var(--firplak-warm-white);
+  --sidebar-accent: oklch(0.30 0.015 215);
+  --sidebar-accent-foreground: var(--firplak-warm-white);
+  --sidebar-border: oklch(0.97 0.012 85 / 8%);
+  --sidebar-ring: var(--firplak-blue-gray);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(at 10% 8%, color-mix(in oklch, var(--firplak-navy) 14%, transparent) 0px, transparent 55%),
+      radial-gradient(at 92% 6%, color-mix(in oklch, var(--firplak-blue-gray) 18%, transparent) 0px, transparent 55%),
+      radial-gradient(at 70% 92%, color-mix(in oklch, var(--firplak-navy) 10%, transparent) 0px, transparent 55%);
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image:
+      radial-gradient(at 10% 8%, color-mix(in oklch, var(--firplak-navy) 28%, transparent) 0px, transparent 55%),
+      radial-gradient(at 92% 6%, color-mix(in oklch, var(--firplak-blue-gray) 22%, transparent) 0px, transparent 55%),
+      radial-gradient(at 70% 92%, color-mix(in oklch, var(--firplak-navy) 22%, transparent) 0px, transparent 55%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Liquid Glass — primary surface treatment.
+     Tokens carry the FIRPLAK palette, so all glass surfaces inherit the
+     warm cream tint in light mode and the lifted near-black in dark. */
+  .glass {
+    background-color: color-mix(in oklch, var(--card) 72%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid color-mix(in oklch, var(--firplak-navy) 14%, transparent);
+    box-shadow:
+      0 1px 0 0 color-mix(in oklch, #ffffff 60%, transparent) inset,
+      0 12px 40px -16px color-mix(in oklch, var(--firplak-navy) 22%, transparent);
+  }
+  .dark .glass {
+    background-color: color-mix(in oklch, var(--card) 58%, transparent);
+    border-color: color-mix(in oklch, var(--foreground) 10%, transparent);
+    box-shadow:
+      0 1px 0 0 color-mix(in oklch, #ffffff 10%, transparent) inset,
+      0 16px 50px -16px rgba(0, 0, 0, 0.65);
+  }
+
+  .glass-subtle {
+    background-color: color-mix(in oklch, var(--card) 52%, transparent);
+    backdrop-filter: saturate(160%) blur(14px);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border: 1px solid color-mix(in oklch, var(--firplak-navy) 10%, transparent);
+  }
+  .dark .glass-subtle {
+    border-color: color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+
+  .glass-strong {
+    background-color: color-mix(in oklch, var(--card) 88%, transparent);
+    backdrop-filter: saturate(200%) blur(28px);
+    -webkit-backdrop-filter: saturate(200%) blur(28px);
+    border: 1px solid color-mix(in oklch, var(--firplak-navy) 16%, transparent);
+  }
+  .dark .glass-strong {
+    border-color: color-mix(in oklch, var(--foreground) 12%, transparent);
+  }
+
+  .glass-hover {
+    @apply transition-colors;
+  }
+  .glass-hover:hover {
+    background-color: color-mix(in oklch, var(--card) 82%, transparent);
+  }
+
+  /* Soft hairline divider used between shell regions */
+  .hairline {
+    border-color: color-mix(in oklch, var(--firplak-navy) 12%, transparent);
+  }
+  .dark .hairline {
+    border-color: color-mix(in oklch, var(--foreground) 10%, transparent);
+  }
+}
+
+@layer utilities {
+  /* Scrollbar polish for premium feel */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklch, var(--firplak-navy) 22%, transparent);
+    border-radius: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklch, var(--firplak-navy) 32%, transparent);
+  }
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklch, var(--foreground) 18%, transparent);
+  }
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklch, var(--foreground) 28%, transparent);
+  }
 }
