@@ -9,6 +9,7 @@ import {
   Download,
   Wand2,
   Settings,
+  Upload,
 } from "lucide-react"
 
 import type { NavItemId, NavSectionId } from "@/lib/i18n"
@@ -54,6 +55,7 @@ export const navigation: NavSection[] = [
     id: "tools",
     items: [
       { id: "kpi-builder", href: "/kpi-builder", icon: Wand2 },
+      { id: "data-import", href: "/settings/data-import", icon: Upload },
       { id: "settings", href: "/settings", icon: Settings },
     ],
   },
