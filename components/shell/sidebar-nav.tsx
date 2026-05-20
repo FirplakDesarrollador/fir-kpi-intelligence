@@ -30,8 +30,7 @@ export function SidebarNav({ onNavigate, className }: SidebarNavProps) {
           <ul className="flex flex-col gap-0.5">
             {section.items.map((item) => {
               const Icon = item.icon
-              const active =
-                pathname === item.href || pathname?.startsWith(item.href + "/")
+              const active = pathname === item.href
               const title = t.nav.items[item.id]
 
               return (

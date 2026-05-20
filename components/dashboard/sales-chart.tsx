@@ -151,6 +151,9 @@ export type SalesChartProps = {
 }
 
 export function SalesChart({ className, filters }: SalesChartProps) {
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => { setMounted(true) }, [])
+
   const filterKey = React.useMemo(
     () => JSON.stringify(filters ?? null),
     [filters]
@@ -209,7 +212,7 @@ export function SalesChart({ className, filters }: SalesChartProps) {
         </div>
       </div>
 
-      {isLoading ? (
+      {!mounted || isLoading ? (
         <ChartSkeleton />
       ) : (
         <div className="mt-5 h-[300px] w-full">

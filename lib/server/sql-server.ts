@@ -13,14 +13,14 @@ function buildConfig(): SqlConfig {
   };
 
   return {
-    server: required("SAP_SQL_SERVER"),
-    port: parseInt(process.env.SAP_SQL_PORT ?? "1433", 10),
-    database: required("SAP_SQL_DATABASE"),
-    user: required("SAP_SQL_USER"),
-    password: required("SAP_SQL_PASSWORD"),
+    server: required("DB_SERVER"),
+    port: 1433,
+    database: required("DB_NAME"),
+    user: required("DB_USER"),
+    password: required("DB_PASSWORD"),
     options: {
-      encrypt: process.env.SAP_SQL_ENCRYPT !== "false",
-      trustServerCertificate: process.env.SAP_SQL_TRUST_CERT === "true",
+      encrypt: false,
+      trustServerCertificate: true,
     },
     pool: {
       min: 2,
