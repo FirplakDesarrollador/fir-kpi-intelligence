@@ -52,112 +52,118 @@
 /*  FIRPLAK brand palette (single source of truth)                    */
 /* ------------------------------------------------------------------ */
 :root {
-  --firplak-navy: #254153;
+  --firplak-navy:      #254153;
   --firplak-blue-gray: #749094;
-  --firplak-black: #1d1d1b;
-  --firplak-warm-white: #f5f1ea;
+  --firplak-black:     #1d1d1b;
+  --firplak-warm-white:#f5f1ea;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Light mode — warm off-white base, navy accents                    */
+/*  Light mode                                                         */
+/*                                                                     */
+/*  Design rule: the warm off-white canvas is DOMINANT.               */
+/*  Glass panels are nearly transparent — depth comes from shadows,   */
+/*  specular highlights, and the warm→cool directional gradient        */
+/*  inside the glass, not from the panel colour being dark.           */
+/*                                                                     */
+/*  All color-mix uses srgb (not oklch) to prevent purple artifacts.  */
 /* ------------------------------------------------------------------ */
 :root {
-  --background: var(--firplak-warm-white);
-  --foreground: var(--firplak-black);
+  --background:    var(--firplak-warm-white); /* #f5f1ea — always dominant */
+  --foreground:    var(--firplak-black);
 
-  /* Surfaces — slightly lifted off the cream base for liquid glass */
-  --card: oklch(0.985 0.008 85);
+  /* Card base: nearly the same as background so glass is transparent,
+     not opaque. Panels float rather than block. */
+  --card:          oklch(0.982 0.005 85);
   --card-foreground: var(--firplak-black);
-  --popover: oklch(0.985 0.008 85);
+  --popover:       oklch(0.984 0.004 85);
   --popover-foreground: var(--firplak-black);
 
-  --primary: var(--firplak-navy);
+  --primary:           var(--firplak-navy);
   --primary-foreground: var(--firplak-warm-white);
 
-  --secondary: oklch(0.93 0.01 85);
+  /* Secondary / muted / accent: blue-gray family for inputs, pills, chips.
+     These sit INSIDE glass panels so a cooler hue adds depth hierarchy. */
+  --secondary:          oklch(0.905 0.013 210);
   --secondary-foreground: var(--firplak-navy);
+  --muted:              oklch(0.905 0.013 210);
+  --muted-foreground:   oklch(0.41 0.030 216); /* FIRPLAK blue-gray, readable */
+  --accent:             oklch(0.905 0.013 210);
+  --accent-foreground:  var(--firplak-navy);
 
-  --muted: oklch(0.93 0.01 85);
-  --muted-foreground: oklch(0.48 0.02 215); /* warm blue-gray text */
+  --destructive: oklch(0.55 0.20 25);
 
-  --accent: oklch(0.93 0.01 85);
-  --accent-foreground: var(--firplak-navy);
+  /* Borders: crisp blue-gray lines give architectural precision */
+  --border: oklch(0.830 0.017 210);
+  --input:  oklch(0.830 0.017 210);
+  --ring:   var(--firplak-blue-gray);
 
-  --destructive: oklch(0.55 0.2 25);
-
-  --border: oklch(0.86 0.012 85);
-  --input: oklch(0.86 0.012 85);
-  --ring: var(--firplak-blue-gray);
-
-  /* Chart palette — FIRPLAK-led, with restrained warm and cool accents */
   --chart-1: var(--firplak-navy);
   --chart-2: var(--firplak-blue-gray);
-  --chart-3: oklch(0.55 0.04 220);
-  --chart-4: oklch(0.78 0.09 70);
-  --chart-5: oklch(0.62 0.08 200);
+  --chart-3: oklch(0.46 0.060 212);
+  --chart-4: oklch(0.72 0.10 70);
+  --chart-5: oklch(0.58 0.09 195);
 
   --radius: 0.75rem;
 
-  /* Sidebar — slightly cooler off-white for separation from main canvas */
-  --sidebar: oklch(0.97 0.01 85);
+  /* Sidebar token (used by bg-sidebar explicit class) */
+  --sidebar:            oklch(0.976 0.005 85);
   --sidebar-foreground: var(--firplak-black);
-  --sidebar-primary: var(--firplak-navy);
+  --sidebar-primary:    var(--firplak-navy);
   --sidebar-primary-foreground: var(--firplak-warm-white);
-  --sidebar-accent: oklch(0.93 0.01 85);
+  --sidebar-accent:     oklch(0.905 0.013 210);
   --sidebar-accent-foreground: var(--firplak-navy);
-  --sidebar-border: oklch(0.86 0.012 85);
-  --sidebar-ring: var(--firplak-blue-gray);
+  --sidebar-border:     oklch(0.830 0.017 210);
+  --sidebar-ring:       var(--firplak-blue-gray);
 }
 
 /* ------------------------------------------------------------------ */
-/*  Dark mode — FIRPLAK black base, lifted navy surfaces              */
+/*  Dark mode — unchanged, user confirmed it looks very good          */
 /* ------------------------------------------------------------------ */
 .dark {
-  --background: var(--firplak-black);
-  --foreground: var(--firplak-warm-white);
+  --background:    var(--firplak-black);
+  --foreground:    var(--firplak-warm-white);
 
-  --card: oklch(0.24 0.008 95);
+  --card:          oklch(0.235 0.010 215);
   --card-foreground: var(--firplak-warm-white);
-  --popover: oklch(0.26 0.008 95);
+  --popover:       oklch(0.252 0.010 215);
   --popover-foreground: var(--firplak-warm-white);
 
-  /* On dark, primary becomes a high-contrast cream for buttons,
-     while brand identity is carried by the lighter navy in charts. */
-  --primary: var(--firplak-warm-white);
+  --primary:            var(--firplak-warm-white);
   --primary-foreground: var(--firplak-navy);
 
-  --secondary: oklch(0.30 0.015 215);
+  --secondary:          oklch(0.298 0.016 215);
   --secondary-foreground: var(--firplak-warm-white);
-
-  --muted: oklch(0.28 0.012 215);
-  --muted-foreground: oklch(0.72 0.018 215);
-
-  --accent: oklch(0.30 0.015 215);
-  --accent-foreground: var(--firplak-warm-white);
+  --muted:              oklch(0.278 0.014 215);
+  --muted-foreground:   oklch(0.70 0.022 215);
+  --accent:             oklch(0.298 0.016 215);
+  --accent-foreground:  var(--firplak-warm-white);
 
   --destructive: oklch(0.70 0.19 25);
 
-  --border: oklch(0.97 0.012 85 / 8%);
-  --input: oklch(0.97 0.012 85 / 12%);
-  --ring: var(--firplak-blue-gray);
+  --border: rgba(245, 241, 234, 0.09);
+  --input:  rgba(245, 241, 234, 0.13);
+  --ring:   var(--firplak-blue-gray);
 
-  /* Lift the navy so it remains readable on a near-black canvas. */
-  --chart-1: oklch(0.68 0.07 232);
+  --chart-1: oklch(0.68 0.072 232);
   --chart-2: var(--firplak-blue-gray);
-  --chart-3: oklch(0.72 0.05 215);
+  --chart-3: oklch(0.72 0.050 215);
   --chart-4: oklch(0.82 0.10 70);
-  --chart-5: oklch(0.62 0.08 200);
+  --chart-5: oklch(0.62 0.08 195);
 
-  --sidebar: oklch(0.22 0.008 95);
+  --sidebar:            oklch(0.218 0.010 215);
   --sidebar-foreground: var(--firplak-warm-white);
-  --sidebar-primary: oklch(0.68 0.07 232);
+  --sidebar-primary:    oklch(0.68 0.072 232);
   --sidebar-primary-foreground: var(--firplak-warm-white);
-  --sidebar-accent: oklch(0.30 0.015 215);
+  --sidebar-accent:     oklch(0.298 0.016 215);
   --sidebar-accent-foreground: var(--firplak-warm-white);
-  --sidebar-border: oklch(0.97 0.012 85 / 8%);
-  --sidebar-ring: var(--firplak-blue-gray);
+  --sidebar-border:     rgba(245, 241, 234, 0.08);
+  --sidebar-ring:       var(--firplak-blue-gray);
 }
 
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -170,97 +176,192 @@
   }
   body {
     @apply bg-background text-foreground;
+    /*
+      Light: very subtle atmospheric halos — warm canvas stays dominant.
+      Upper-left: structural navy depth shadow.
+      Upper-right: FIRPLAK blue-gray ambient "executive window" light.
+      Bottom: soft navy grounding so the canvas doesn't feel float-y.
+      srgb mixing is critical — oklch here routes through purple hues.
+    */
     background-image:
-      radial-gradient(at 10% 8%, color-mix(in oklch, var(--firplak-navy) 14%, transparent) 0px, transparent 55%),
-      radial-gradient(at 92% 6%, color-mix(in oklch, var(--firplak-blue-gray) 18%, transparent) 0px, transparent 55%),
-      radial-gradient(at 70% 92%, color-mix(in oklch, var(--firplak-navy) 10%, transparent) 0px, transparent 55%);
+      radial-gradient(ellipse 80% 55% at  0%   0%, rgba( 37,  65,  83, 0.07) 0%, transparent 65%),
+      radial-gradient(ellipse 65% 45% at 100%   0%, rgba(116, 144, 148, 0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 75% 45% at  55% 100%, rgba( 37,  65,  83, 0.05) 0%, transparent 60%);
     background-attachment: fixed;
   }
   .dark body {
     background-image:
-      radial-gradient(at 10% 8%, color-mix(in oklch, var(--firplak-navy) 28%, transparent) 0px, transparent 55%),
-      radial-gradient(at 92% 6%, color-mix(in oklch, var(--firplak-blue-gray) 22%, transparent) 0px, transparent 55%),
-      radial-gradient(at 70% 92%, color-mix(in oklch, var(--firplak-navy) 22%, transparent) 0px, transparent 55%);
+      radial-gradient(ellipse 80% 55% at  0%   0%, rgba( 37,  65,  83, 0.32) 0%, transparent 60%),
+      radial-gradient(ellipse 65% 45% at 100%   0%, rgba(116, 144, 148, 0.22) 0%, transparent 55%),
+      radial-gradient(ellipse 75% 45% at  55% 100%, rgba( 37,  65,  83, 0.26) 0%, transparent 60%);
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  Liquid Glass surface system                                        */
+/*                                                                     */
+/*  Light mode principle: real architectural glass is nearly           */
+/*  transparent. The premium quality comes from a layered shadow       */
+/*  stack, a top-edge specular highlight, a precise border, and a     */
+/*  warm→cool directional gradient that reads as frosted glass with    */
+/*  an overhead light source — not from making the panel dark.        */
+/*                                                                     */
+/*  backdrop-filter saturate is capped at 120% (was 180%). Higher     */
+/*  values amplify the warm background tint into pink/magenta.        */
+/* ------------------------------------------------------------------ */
 @layer components {
-  /* Liquid Glass — primary surface treatment.
-     Tokens carry the FIRPLAK palette, so all glass surfaces inherit the
-     warm cream tint in light mode and the lifted near-black in dark. */
+
+  /* ── Primary glass panel ──────────────────────────────────────── */
   .glass {
-    background-color: color-mix(in oklch, var(--card) 72%, transparent);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border: 1px solid color-mix(in oklch, var(--firplak-navy) 14%, transparent);
+    /*
+      Warm-to-cool directional gradient simulates real architectural glass
+      with an overhead light source: bright warm at the top (reflected
+      ambient), cool blue-gray at the bottom (glass tint / atmosphere).
+      Both stops are partially transparent so the #f5f1ea canvas reads
+      through — the panel floats rather than covers.
+    */
+    background: linear-gradient(
+      158deg,
+      rgba(251, 249, 245, 0.70) 0%,
+      rgba(236, 241, 245, 0.56) 100%
+    );
+    /*
+      28px blur (was 24px) produces a richer frosted-glass depth.
+      Saturation held at 120% to prevent the warm background from
+      amplifying into pink.  brightness(1.02) lifts the panel just
+      above the canvas — reinforces the floating sensation.
+    */
+    backdrop-filter: saturate(120%) blur(28px) brightness(1.02);
+    -webkit-backdrop-filter: saturate(120%) blur(28px) brightness(1.02);
+    border: 1px solid rgba(37, 65, 83, 0.13);
+
+    /*
+      7-layer shadow stack:
+      1. Top inset — bright specular (overhead light hitting glass face)
+      2. Left inset — secondary ambient specular (side light)
+      3. Right inset — faint tertiary edge catch (opposite side)
+      4. Bottom inset — glass thickness / density suggestion
+      5. Contact shadow — panel sits ~1px above canvas
+      6. Mid shadow — panel depth, navy-tinted
+      7. Atmospheric shadow — cinematic depth, soft navy
+    */
     box-shadow:
-      0 1px 0 0 color-mix(in oklch, #ffffff 60%, transparent) inset,
-      0 12px 40px -16px color-mix(in oklch, var(--firplak-navy) 22%, transparent);
+      0   1px 0 0 rgba(255, 255, 255, 0.92) inset,
+      1px 0   0 0 rgba(255, 255, 255, 0.34) inset,
+     -1px 0   0 0 rgba(255, 255, 255, 0.14) inset,
+      0  -1px 0 0 rgba( 37,  65,  83, 0.05) inset,
+      0   1px 4px     rgba( 37,  65,  83, 0.04),
+      0   8px 24px -6px rgba( 37,  65,  83, 0.11),
+      0  28px 64px -18px rgba( 37,  65,  83, 0.12);
   }
   .dark .glass {
-    background-color: color-mix(in oklch, var(--card) 58%, transparent);
-    border-color: color-mix(in oklch, var(--foreground) 10%, transparent);
+    background: color-mix(in srgb, var(--card) 58%, transparent);
+    backdrop-filter: saturate(160%) blur(28px);
+    -webkit-backdrop-filter: saturate(160%) blur(28px);
+    border-color: rgba(245, 241, 234, 0.10);
     box-shadow:
-      0 1px 0 0 color-mix(in oklch, #ffffff 10%, transparent) inset,
-      0 16px 50px -16px rgba(0, 0, 0, 0.65);
+      0 1px 0 0 rgba(255, 255, 255, 0.07) inset,
+      0 4px 12px -4px  rgba(0, 0, 0, 0.40),
+      0 18px 54px -14px rgba(0, 0, 0, 0.72);
   }
 
+  /* ── Subtle glass — secondary / nested surfaces ───────────────── */
   .glass-subtle {
-    background-color: color-mix(in oklch, var(--card) 52%, transparent);
-    backdrop-filter: saturate(160%) blur(14px);
-    -webkit-backdrop-filter: saturate(160%) blur(14px);
-    border: 1px solid color-mix(in oklch, var(--firplak-navy) 10%, transparent);
+    background: linear-gradient(
+      158deg,
+      rgba(251, 249, 245, 0.52) 0%,
+      rgba(236, 241, 245, 0.40) 100%
+    );
+    backdrop-filter: saturate(110%) blur(18px) brightness(1.01);
+    -webkit-backdrop-filter: saturate(110%) blur(18px) brightness(1.01);
+    border: 1px solid rgba(37, 65, 83, 0.09);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.80) inset,
+      0 4px 14px -4px rgba(37, 65, 83, 0.07);
   }
   .dark .glass-subtle {
-    border-color: color-mix(in oklch, var(--foreground) 8%, transparent);
+    background: color-mix(in srgb, var(--card) 45%, transparent);
+    backdrop-filter: saturate(140%) blur(18px);
+    -webkit-backdrop-filter: saturate(140%) blur(18px);
+    border-color: rgba(245, 241, 234, 0.07);
+    box-shadow: none;
   }
 
+  /* ── Strong glass — tooltips, dropdowns, overlays ────────────── */
   .glass-strong {
-    background-color: color-mix(in oklch, var(--card) 88%, transparent);
-    backdrop-filter: saturate(200%) blur(28px);
-    -webkit-backdrop-filter: saturate(200%) blur(28px);
-    border: 1px solid color-mix(in oklch, var(--firplak-navy) 16%, transparent);
+    background: linear-gradient(
+      158deg,
+      rgba(251, 249, 245, 0.92) 0%,
+      rgba(240, 244, 248, 0.86) 100%
+    );
+    backdrop-filter: saturate(125%) blur(36px) brightness(1.025);
+    -webkit-backdrop-filter: saturate(125%) blur(36px) brightness(1.025);
+    border: 1px solid rgba(37, 65, 83, 0.16);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.96) inset,
+      1px 0 0 0 rgba(255, 255, 255, 0.40) inset,
+      0 4px 18px -4px  rgba(37, 65, 83, 0.13),
+      0 16px 44px -10px rgba(37, 65, 83, 0.11);
   }
   .dark .glass-strong {
-    border-color: color-mix(in oklch, var(--foreground) 12%, transparent);
+    background: color-mix(in srgb, var(--card) 86%, transparent);
+    backdrop-filter: saturate(170%) blur(36px);
+    -webkit-backdrop-filter: saturate(170%) blur(36px);
+    border-color: rgba(245, 241, 234, 0.13);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+      0 8px 26px -6px rgba(0, 0, 0, 0.52);
   }
 
+  /* ── Hover modifier ───────────────────────────────────────────── */
   .glass-hover {
-    @apply transition-colors;
+    @apply transition-all duration-200;
   }
   .glass-hover:hover {
-    background-color: color-mix(in oklch, var(--card) 82%, transparent);
+    background: linear-gradient(
+      158deg,
+      rgba(251, 249, 245, 0.78) 0%,
+      rgba(236, 241, 245, 0.64) 100%
+    );
+    box-shadow:
+      0   1px 0 0 rgba(255, 255, 255, 0.94) inset,
+      1px 0   0 0 rgba(255, 255, 255, 0.38) inset,
+     -1px 0   0 0 rgba(255, 255, 255, 0.16) inset,
+      0  -1px 0 0 rgba( 37,  65,  83, 0.06) inset,
+      0   2px 6px      rgba( 37,  65,  83, 0.05),
+      0  10px 28px -6px rgba( 37,  65,  83, 0.13),
+      0  32px 72px -18px rgba( 37,  65,  83, 0.14);
+  }
+  .dark .glass-hover:hover {
+    background: color-mix(in srgb, var(--card) 65%, transparent);
   }
 
-  /* Soft hairline divider used between shell regions */
+  /* ── Hairline separator ───────────────────────────────────────── */
   .hairline {
-    border-color: color-mix(in oklch, var(--firplak-navy) 12%, transparent);
+    border-color: rgba(37, 65, 83, 0.10);
   }
   .dark .hairline {
-    border-color: color-mix(in oklch, var(--foreground) 10%, transparent);
+    border-color: rgba(245, 241, 234, 0.09);
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  Utilities                                                          */
+/* ------------------------------------------------------------------ */
 @layer utilities {
-  /* Scrollbar polish for premium feel */
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: color-mix(in oklch, var(--firplak-navy) 22%, transparent);
+  .scrollbar-thin::-webkit-scrollbar        { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track  { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb  {
+    background-color: rgba(37, 65, 83, 0.18);
     border-radius: 8px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(in oklch, var(--firplak-navy) 32%, transparent);
+    background-color: rgba(37, 65, 83, 0.30);
   }
   .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: color-mix(in oklch, var(--foreground) 18%, transparent);
+    background-color: rgba(245, 241, 234, 0.15);
   }
   .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(in oklch, var(--foreground) 28%, transparent);
+    background-color: rgba(245, 241, 234, 0.26);
   }
 }

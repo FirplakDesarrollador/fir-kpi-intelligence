@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 import { cn } from "@/lib/utils"
@@ -14,17 +15,36 @@ export function Brand({
     <Link
       href={href}
       className={cn(
-        "group flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg",
+        "group flex items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className
       )}
       aria-label={t.brand.fullName}
     >
-      <span className="relative flex size-8 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#254153] via-[#3c5d72] to-[#749094] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_16px_-6px_rgba(29,29,27,0.45)]">
-        <span className="text-[13px] font-semibold tracking-tight text-[#f5f1ea]">
-          FK
-        </span>
+      {/*
+        Mark container: fixed 36×36px, position:relative required for fill.
+        CSS class-based theme switching avoids any mounted-state flash because
+        next-themes applies the .dark class to <html> before first paint.
+      */}
+      <span className="relative h-9 w-9 shrink-0">
+        {/* Light mode */}
+        <Image
+          src="/branding/firplak-mark-navy.png"
+          alt="FIRPLAK"
+          fill
+          className="object-contain dark:hidden"
+          priority
+        />
+        {/* Dark mode */}
+        <Image
+          src="/branding/firplak-mark-white.png"
+          alt="FIRPLAK"
+          fill
+          className="hidden object-contain dark:block"
+          priority
+        />
       </span>
-      <span className="flex flex-col leading-none">
+
+      <span className="flex flex-col gap-px leading-none">
         <span className="text-[13px] font-semibold tracking-tight">
           {t.brand.name}
         </span>
