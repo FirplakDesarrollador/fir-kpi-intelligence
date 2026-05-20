@@ -25,6 +25,7 @@ import {
   Sun,
   TrendingUp,
   Truck,
+  Upload,
   Wand2,
   type LucideIcon,
   type LucideProps,
@@ -65,6 +66,7 @@ export const iconRegistry = {
   "sun": Sun,
   "trending-up": TrendingUp,
   "truck": Truck,
+  "upload": Upload,
   "wand": Wand2,
 } as const satisfies Record<string, LucideIcon>
 

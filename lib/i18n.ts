@@ -26,6 +26,7 @@ export type NavItemId =
   | "downloads"
   | "kpi-builder"
   | "settings"
+  | "data-import"
 
 export type NavSectionId = "overview" | "performance" | "operations" | "tools"
 
@@ -181,6 +182,7 @@ const es: Messages = {
       downloads: "Descargas",
       "kpi-builder": "Constructor de KPIs",
       settings: "Configuración",
+      "data-import": "Importar Datos",
     },
     openNavigation: "Abrir navegación",
     navigationTitle: "Navegación",
@@ -466,6 +468,13 @@ const es: Messages = {
         ],
       },
     },
+    "data-import": {
+      metaTitle: "Importar Datos",
+      eyebrow: "Herramientas",
+      title: "Importación de Datos",
+      description:
+        "Carga masiva temporal de ventas, pedidos y entregas desde archivos Excel o CSV.",
+    },
   },
 }
 
@@ -497,6 +506,7 @@ const en: Messages = {
       downloads: "Downloads",
       "kpi-builder": "KPI Builder",
       settings: "Settings",
+      "data-import": "Import Data",
     },
     openNavigation: "Open navigation",
     navigationTitle: "Navigation",
@@ -777,6 +787,13 @@ const en: Messages = {
           "Integrations (Supabase, etc.)",
         ],
       },
+    },
+    "data-import": {
+      metaTitle: "Import Data",
+      eyebrow: "Tools",
+      title: "Data Import",
+      description:
+        "Bulk temporary load of sales, orders, and deliveries from Excel or CSV files.",
     },
   },
 }
