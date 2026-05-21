@@ -477,11 +477,11 @@ function Step4Validate({
       <div className="flex flex-wrap gap-2 text-[12px]">
         <Chip variant="info">{parseResult.rows.length.toLocaleString()} filas detectadas</Chip>
         <Chip variant="info">
-          {Object.keys(parseResult.columnMap).length} de {schema.fields.length} columnas mapeadas
+          {Object.keys(parseResult.columnMap).length} columnas reconocidas
         </Chip>
         {parseResult.unmappedHeaders.length > 0 && (
           <Chip variant="warn">
-            {parseResult.unmappedHeaders.length} columnas no reconocidas
+            {parseResult.unmappedHeaders.length} columnas desconocidas (se ignorarán)
           </Chip>
         )}
         {parseResult.rawRowCount > parseResult.rows.length && (
@@ -491,10 +491,11 @@ function Step4Validate({
         )}
       </div>
 
-      {/* Unmapped headers */}
+      {/* Unknown headers — not in whitelist, will be dropped */}
       {parseResult.unmappedHeaders.length > 0 && (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/8 px-4 py-3 text-[12px] text-amber-700 dark:text-amber-400">
-          <span className="font-semibold">Columnas no reconocidas</span> (se ignorarán):{" "}
+          <span className="font-semibold">Columnas no reconocidas</span>{" "}
+          (no existen en la tabla — se ignorarán y no se enviarán a Supabase):{" "}
           {parseResult.unmappedHeaders.map((h) => `"${h}"`).join(", ")}
         </div>
       )}

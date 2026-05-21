@@ -4,6 +4,11 @@ import { verifySession } from "@/lib/auth/dal"
 import { Sidebar } from "@/components/shell/sidebar"
 import { Topbar } from "@/components/shell/topbar"
 
+// The dashboard always reads the session cookie, so it must never be
+// statically pre-rendered. This also prevents Next.js from evaluating
+// DB-dependent modules during the build-time page-data collection phase.
+export const dynamic = "force-dynamic"
+
 export default async function DashboardLayout({
   children,
 }: {

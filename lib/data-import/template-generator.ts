@@ -2,8 +2,13 @@
  * Excel template generator — client-side only.
  *
  * Generates a .xlsx file with two sheets:
- *  1. "Datos"       — header row + one example row. Users fill from row 3 onward.
- *  2. "Diccionario" — full field reference: column name, label, type, required, example.
+ *  1. "Datos"       — header row uses EXACT DB column names + one example row.
+ *                     Users fill from row 3 onward.
+ *  2. "Diccionario" — full field reference: column name, Spanish label, type,
+ *                     required flag, and example value.
+ *
+ * The "Datos" headers match the Supabase column names exactly so uploaded
+ * files can be parsed without any label-to-column mapping.
  *
  * Uses the `xlsx` (SheetJS) package which is safe to bundle in the browser.
  * This module must NOT be imported in Server Components or Route Handlers.
@@ -17,14 +22,15 @@ export function downloadTemplate(schema: TableSchema): void {
   const wb = XLSX.utils.book_new()
 
   // ── Sheet 1: Datos ────────────────────────────────────────────────────────
-  const headers = schema.fields.map((f) => f.label)
+  // Headers are the exact DB column names — no Spanish labels, no mapping needed.
+  const headers = schema.fields.map((f) => f.key)
   const exampleRow = schema.fields.map((f) => f.example ?? "")
 
   const datosWs = XLSX.utils.aoa_to_sheet([headers, exampleRow])
 
-  // Column widths — wider for label columns, moderate for the rest
+  // Column widths
   datosWs["!cols"] = schema.fields.map((f) => ({
-    wch: Math.max(f.label.length + 4, 18),
+    wch: Math.max(f.key.length + 4, 18),
   }))
 
   // Style the header row bold (SheetJS Community Edition doesn't support full
