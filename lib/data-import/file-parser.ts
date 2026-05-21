@@ -128,7 +128,12 @@ function empty(error: string): ParseResult {
 
 /**
  * Build a mapping from schema field key → spreadsheet column header.
- * Tries label match first, then key match, then fuzzy (normalized) label match.
+ *
+ * Match priority (first hit wins):
+ *  1. Exact label match  (e.g. "Tipo de venta")
+ *  2. Exact key match    (e.g. "sales_type")
+ *  3. Normalized match   (lowercase + accent-stripped label or key)
+ *  4. Legacy alias match (schema.columnAliases — maps old header → field key)
  */
 function buildColumnMap(
   headers: string[],
@@ -136,6 +141,10 @@ function buildColumnMap(
 ): { columnMap: Record<string, string>; unmappedHeaders: string[] } {
   const columnMap: Record<string, string> = {}
   const usedHeaders = new Set<string>()
+
+  // Build a reverse alias map: header string → field key
+  // e.g. { channel: "sales_type", Canal: "sales_type" }
+  const aliasToKey: Record<string, string> = schema.columnAliases ?? {}
 
   for (const field of schema.fields) {
     // 1. Exact label match
@@ -154,6 +163,18 @@ function buildColumnMap(
       columnMap[field.key] = match
       usedHeaders.add(match)
     }
+  }
+
+  // 4. Legacy alias pass — handle renamed columns from older templates.
+  // For each unmatched alias header in the file, resolve it to the current
+  // field key and add the mapping if that field hasn't already been matched.
+  for (const header of headers) {
+    if (usedHeaders.has(header)) continue           // already mapped
+    const targetKey = aliasToKey[header]
+    if (!targetKey) continue                        // not a known alias
+    if (columnMap[targetKey]) continue              // target already mapped via a better match
+    columnMap[targetKey] = header
+    usedHeaders.add(header)
   }
 
   const unmappedHeaders = headers.filter((h) => h && !usedHeaders.has(h))

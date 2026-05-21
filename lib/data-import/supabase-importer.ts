@@ -2,8 +2,14 @@
  * Supabase importer — client-side only.
  *
  * Inserts validated rows into the target Supabase table in batches, using the
- * public anon client. The import is treated as an UPSERT so re-running the
- * same file is idempotent (Supabase upserts on the primary key).
+ * public anon client.
+ *
+ * Insert strategy per table:
+ *  • sales_fact       — plain INSERT (no conflict target).  document_number +
+ *                       item_code is NOT a unique key; the same pair can appear
+ *                       multiple times with different dimensions.
+ *  • orders_fact      — UPSERT on document_number, item_code.
+ *  • deliveries_fact  — UPSERT on delivery_number, item_code.
  *
  * Only the public anon key is used — never the service_role key.
  */
@@ -46,19 +52,32 @@ export async function importRows(
   const batchErrors: string[] = []
   let insertedCount = 0
 
+  // Build the allow-list of valid column keys from the schema once per import.
+  const validKeys = new Set(schema.fields.map((f) => f.key))
+
   for (let offset = 0; offset < rows.length; offset += BATCH_SIZE) {
     const batch = rows.slice(offset, offset + BATCH_SIZE)
 
-    // Strip null values so Supabase uses column defaults
+    // 1. Strip null/empty values so Supabase uses column defaults.
+    // 2. Sanitize: remove any key not declared in the schema so legacy or
+    //    renamed columns (e.g. "channel") never reach the database.
     const cleaned = batch.map((row) =>
       Object.fromEntries(
-        Object.entries(row).filter(([, v]) => v !== null && v !== undefined && v !== "")
+        Object.entries(row).filter(
+          ([k, v]) => validKeys.has(k) && v !== null && v !== undefined && v !== ""
+        )
       )
     )
 
-    const { error, count } = await supabase
-      .from(schema.table)
-      .upsert(cleaned, { onConflict: primaryKey(schema.table), count: "exact" })
+    // sales_fact has no single composite unique key — use plain insert so that
+    // valid rows with repeated document_number + item_code are never dropped.
+    // Other tables upsert on their declared conflict key for idempotency.
+    const { error, count } =
+      schema.table === "sales_fact"
+        ? await supabase.from(schema.table).insert(cleaned, { count: "exact" })
+        : await supabase
+            .from(schema.table)
+            .upsert(cleaned, { onConflict: upsertKey(schema.table), count: "exact" })
 
     if (error) {
       batchErrors.push(
@@ -85,11 +104,13 @@ export async function importRows(
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Primary / conflict key per table. Must match the Supabase table definition. */
-function primaryKey(table: string): string {
+/**
+ * Conflict / upsert key per table.  sales_fact is intentionally absent —
+ * it uses plain insert (see call site above).
+ */
+function upsertKey(table: string): string {
   const keys: Record<string, string> = {
-    sales_fact: "document_number,item_code",
-    orders_fact: "document_number,item_code",
+    orders_fact:     "document_number,item_code",
     deliveries_fact: "delivery_number,item_code",
   }
   return keys[table] ?? "id"

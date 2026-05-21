@@ -4,11 +4,19 @@
  * Runs three validation passes over the parsed rows:
  *  1. Required field check — every required column must be non-empty.
  *  2. Type check — values must be coercible to the declared type.
- *  3. Duplicate check — within the batch, document/delivery key must be unique
- *     (configurable per table).
+ *  3. Duplicate check — behaviour differs per table:
  *
- * Returns a ValidationResult with per-row errors so the wizard can display
- * an annotated preview table before the user confirms the import.
+ *     • orders_fact / deliveries_fact — BLOCKING: rows with a repeated
+ *       (document_number|item_code) or (delivery_number|item_code) key are
+ *       rejected because that pair truly identifies a unique business line.
+ *
+ *     • sales_fact — SOFT WARNING only: the same document_number + item_code
+ *       can legitimately repeat across sellers, stores, cost centres, projects,
+ *       etc.  Only 100 % identical rows (every field equal) trigger a warning;
+ *       those rows are still imported.
+ *
+ * Returns a ValidationResult with per-row errors AND warnings so the wizard
+ * can display an annotated preview before the user confirms the import.
  */
 
 import type { TableSchema, FieldDef } from "./schema-definitions"
@@ -27,30 +35,62 @@ export type ValidationResult = {
   valid: boolean
   /** Rows that passed all checks (will be imported). */
   cleanRows: ParsedRow[]
-  /** Rows that failed at least one check (will not be imported). */
+  /** Rows that failed at least one blocking check (will NOT be imported). */
   errorRows: ParsedRow[]
   errors: RowError[]
+  /** Soft warnings — rows are still imported but flagged for review. */
+  warnings: RowError[]
   /** Summary counts. */
   totalRows: number
   cleanCount: number
   errorCount: number
+  warningCount: number
 }
 
-/** Natural-key fields per table used for duplicate detection within the batch. */
-const DUPLICATE_KEYS: Record<string, string[]> = {
-  sales_fact: ["document_number", "item_code"],
-  orders_fact: ["document_number", "item_code"],
+// ---------------------------------------------------------------------------
+// Duplicate detection configuration
+// ---------------------------------------------------------------------------
+
+/**
+ * BLOCKING duplicate keys — a repeated composite key causes the row to be
+ * rejected entirely.  Only for tables where the key truly identifies a unique
+ * business line.
+ */
+const BLOCKING_DUPLICATE_KEYS: Record<string, string[]> = {
+  orders_fact:     ["document_number", "item_code"],
   deliveries_fact: ["delivery_number", "item_code"],
 }
+
+/**
+ * Tables that use SOFT duplicate detection instead of blocking.
+ * For these, only exact full-row matches (every field identical) produce a
+ * warning; the rows are still included in cleanRows and will be imported.
+ *
+ * sales_fact is here because document_number + item_code is not unique —
+ * the same combo can appear multiple times with different seller/store/
+ * cost_centre/project/segment/price/discount/etc. dimensions.
+ */
+const SOFT_DUPLICATE_TABLES = new Set<string>(["sales_fact"])
+
+// ---------------------------------------------------------------------------
+// validateRows
+// ---------------------------------------------------------------------------
 
 export function validateRows(
   rows: ParsedRow[],
   schema: TableSchema
 ): ValidationResult {
   const errors: RowError[] = []
+  const warnings: RowError[] = []
   const errorRowIndices = new Set<number>()
-  const seenKeys = new Set<string>()
-  const dupeFields = DUPLICATE_KEYS[schema.table] ?? []
+
+  // Blocking dedup state
+  const blockingFields = BLOCKING_DUPLICATE_KEYS[schema.table] ?? []
+  const seenBlockingKeys = new Set<string>()
+
+  // Soft dedup state (exact full-row fingerprint)
+  const isSoftTable = SOFT_DUPLICATE_TABLES.has(schema.table)
+  const seenFingerprints = new Set<string>()
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
@@ -80,23 +120,38 @@ export function validateRows(
       }
     }
 
-    // 3. Duplicate key within batch
-    if (dupeFields.length > 0) {
-      const compositeKey = dupeFields
+    // 3a. Blocking duplicate check (orders_fact, deliveries_fact)
+    if (blockingFields.length > 0) {
+      const compositeKey = blockingFields
         .map((k) => String(row[k] ?? ""))
         .join("|")
-      if (compositeKey && compositeKey !== "|".repeat(dupeFields.length - 1)) {
-        if (seenKeys.has(compositeKey)) {
-          const keyLabel = dupeFields.join(" + ")
+      const isBlank = compositeKey === "|".repeat(blockingFields.length - 1)
+      if (compositeKey && !isBlank) {
+        if (seenBlockingKeys.has(compositeKey)) {
           errors.push({
             row: rowNum,
-            field: dupeFields[0],
-            message: `Clave duplicada en el lote (${keyLabel}): "${compositeKey}".`,
+            field: blockingFields[0],
+            message: `Clave duplicada en el lote (${blockingFields.join(" + ")}): "${compositeKey}".`,
           })
           errorRowIndices.add(i)
         } else {
-          seenKeys.add(compositeKey)
+          seenBlockingKeys.add(compositeKey)
         }
+      }
+    }
+
+    // 3b. Soft duplicate check (sales_fact) — full-row fingerprint, warning only
+    if (isSoftTable) {
+      const fingerprint = rowFingerprint(row, schema)
+      if (seenFingerprints.has(fingerprint)) {
+        warnings.push({
+          row: rowNum,
+          field: "document_number",
+          message: `Fila exactamente duplicada en el lote (todos los campos son idénticos). Se importará igualmente.`,
+        })
+        // NOT added to errorRowIndices — row still imported
+      } else {
+        seenFingerprints.add(fingerprint)
       }
     }
   }
@@ -109,10 +164,24 @@ export function validateRows(
     cleanRows,
     errorRows,
     errors,
+    warnings,
     totalRows: rows.length,
     cleanCount: cleanRows.length,
     errorCount: errorRows.length,
+    warningCount: warnings.length,
   }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * Produces a deterministic string fingerprint of all field values in a row.
+ * Used for exact full-row duplicate detection in soft-dedup tables.
+ */
+function rowFingerprint(row: ParsedRow, schema: TableSchema): string {
+  return schema.fields
+    .map((f) => `${f.key}=${String(row[f.key] ?? "")}`)
+    .join("\x00")
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
