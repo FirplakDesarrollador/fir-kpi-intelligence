@@ -3,11 +3,13 @@
 import * as React from "react"
 
 import { DashboardKpiGrid } from "@/components/dashboard/dashboard-kpi-grid"
-import { GlobalFilters } from "@/components/dashboard/global-filters"
+import { GlobalFilters, type FilterOption } from "@/components/dashboard/global-filters"
 import { OperationalHealthPanel } from "@/components/dashboard/operational-health-panel"
 import { SalesChart } from "@/components/dashboard/sales-chart"
 import { useDashboardFilters } from "@/lib/hooks/use-dashboard-filters"
-import { t } from "@/lib/i18n"
+import { useSupabaseQuery } from "@/lib/hooks/use-supabase-query"
+import { t, type FilterKey } from "@/lib/i18n"
+import { getSalesFilters } from "@/lib/supabase/sales-fact"
 
 /**
  * Client wrapper that owns the dashboard filter state and threads it through
@@ -15,17 +17,40 @@ import { t } from "@/lib/i18n"
  * wrapper below the SectionHeader, keeping the page itself a Server Component.
  *
  * The same `state` object is passed (controlled) to `GlobalFilters` and the
- * raw `filters` to each data consumer. Filters changes propagate through the
+ * raw `filters` to each data consumer. Filter changes propagate through the
  * `useSupabaseQuery` deps inside each consumer, so the KPI grid, chart, and
  * operational health panel refetch automatically.
+ *
+ * Filter options are fetched once on mount from `sales_fact` distinct values
+ * and merged into `GlobalFilters` — no hardcoded dimension lists.
  */
 export function DashboardContent() {
   const state = useDashboardFilters()
   const { filters } = state
 
+  // Fetch distinct filter options from sales_fact once on mount.
+  const { data: filterData } = useSupabaseQuery(() => getSalesFilters(), [])
+
+  // Map SalesFilterOptions → Record<FilterKey, FilterOption[]> for GlobalFilters.
+  const opts = React.useMemo<Partial<Record<FilterKey, FilterOption[]>>>(() => {
+    if (!filterData) return {}
+    return {
+      year:            filterData.years,
+      month:           filterData.months,
+      zone:            filterData.zones,
+      territory:       filterData.territories,
+      seller:          filterData.seniorSellers,
+      channel:         filterData.salesTypes,   // "channel" key → sales_type values
+      productFamily:   filterData.productFamilies,
+      customerGroup:   filterData.customerGroups,
+      customerSubgroup: filterData.customerSubgroups,
+      customerSegment: filterData.customerSegments,
+    }
+  }, [filterData])
+
   return (
     <>
-      <GlobalFilters state={state} />
+      <GlobalFilters state={state} options={opts} />
       <DashboardKpiGrid filters={filters} />
       <section
         aria-label={t.dashboard.chartAria}

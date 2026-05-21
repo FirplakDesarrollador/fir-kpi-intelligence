@@ -19,20 +19,6 @@ import { fetchSalesMonthly, type SalesMonth } from "@/lib/queries"
 import { t } from "@/lib/i18n"
 import type { DashboardFilters } from "@/lib/hooks/use-dashboard-filters"
 
-const MOCK_DATA: SalesMonth[] = [
-  { month: "Jan", sales: 412, budget: 380 },
-  { month: "Feb", sales: 438, budget: 410 },
-  { month: "Mar", sales: 502, budget: 480 },
-  { month: "Apr", sales: 486, budget: 510 },
-  { month: "May", sales: 561, budget: 540 },
-  { month: "Jun", sales: 624, budget: 580 },
-  { month: "Jul", sales: 590, budget: 610 },
-  { month: "Aug", sales: 658, budget: 640 },
-  { month: "Sep", sales: 712, budget: 680 },
-  { month: "Oct", sales: 745, budget: 720 },
-  { month: "Nov", sales: 802, budget: 760 },
-  { month: "Dec", sales: 868, budget: 820 },
-]
 
 function formatAxis(value: number) {
   const abs = Math.abs(value)
@@ -163,12 +149,11 @@ export function SalesChart({ className, filters }: SalesChartProps) {
     [filterKey]
   )
   const liveRows = data ?? []
-  const usingMock = !isLoading && liveRows.length === 0
-  const rows: SalesMonth[] = liveRows.length > 0 ? liveRows : MOCK_DATA
+  const isEmpty = !isLoading && !error && liveRows.length === 0
 
   const displayRows = React.useMemo(
-    () => rows.map((r) => ({ ...r, label: shortLabel(r.month) })),
-    [rows]
+    () => liveRows.map((r) => ({ ...r, label: shortLabel(r.month) })),
+    [liveRows]
   )
 
   return (
@@ -200,13 +185,13 @@ export function SalesChart({ className, filters }: SalesChartProps) {
             <span className="size-2 rounded-full bg-[var(--chart-2)]" />
             {t.chart.budget}
           </span>
-          {(usingMock || error) && !isLoading ? (
+          {(isEmpty || error) && !isLoading ? (
             <span
               title={error?.message ?? t.chart.fallbackTooltip}
               className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 ring-1 ring-amber-500/20 dark:text-amber-400"
             >
               <Icon name="alert-triangle" className="size-3" />
-              {t.common.fallback}
+              {error ? t.common.fallback : "sin datos"}
             </span>
           ) : null}
         </div>
@@ -214,6 +199,10 @@ export function SalesChart({ className, filters }: SalesChartProps) {
 
       {!mounted || isLoading ? (
         <ChartSkeleton />
+      ) : isEmpty ? (
+        <div className="mt-5 flex h-[300px] items-center justify-center text-sm text-muted-foreground">
+          Sin datos de ventas para el período seleccionado.
+        </div>
       ) : (
         <div className="mt-5 h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">

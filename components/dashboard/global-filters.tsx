@@ -20,8 +20,9 @@ import {
   type DashboardFilters,
   type UseDashboardFiltersReturn,
 } from "@/lib/hooks/use-dashboard-filters"
+import type { FilterOption } from "@/lib/supabase/sales-fact"
 
-export type FilterOption = { value: string; label: string }
+export type { FilterOption }
 
 /** Sentinel value used inside the Select to represent "no filter applied". */
 const ALL_VALUE = "__all__"
