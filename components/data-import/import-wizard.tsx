@@ -477,11 +477,11 @@ function Step4Validate({
       <div className="flex flex-wrap gap-2 text-[12px]">
         <Chip variant="info">{parseResult.rows.length.toLocaleString()} filas detectadas</Chip>
         <Chip variant="info">
-          {Object.keys(parseResult.columnMap).length} de {schema.fields.length} columnas mapeadas
+          {Object.keys(parseResult.columnMap).length} columnas reconocidas
         </Chip>
         {parseResult.unmappedHeaders.length > 0 && (
           <Chip variant="warn">
-            {parseResult.unmappedHeaders.length} columnas no reconocidas
+            {parseResult.unmappedHeaders.length} columnas desconocidas (se ignorarán)
           </Chip>
         )}
         {parseResult.rawRowCount > parseResult.rows.length && (
@@ -491,10 +491,11 @@ function Step4Validate({
         )}
       </div>
 
-      {/* Unmapped headers */}
+      {/* Unknown headers — not in whitelist, will be dropped */}
       {parseResult.unmappedHeaders.length > 0 && (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/8 px-4 py-3 text-[12px] text-amber-700 dark:text-amber-400">
-          <span className="font-semibold">Columnas no reconocidas</span> (se ignorarán):{" "}
+          <span className="font-semibold">Columnas no reconocidas</span>{" "}
+          (no existen en la tabla — se ignorarán y no se enviarán a Supabase):{" "}
           {parseResult.unmappedHeaders.map((h) => `"${h}"`).join(", ")}
         </div>
       )}
@@ -584,6 +585,7 @@ function Step5Confirm({
         />
       </div>
 
+      {/* Blocking errors */}
       {validationResult.errors.length > 0 && (
         <div className="flex flex-col gap-1.5 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
           <p className="text-[12px] font-semibold text-red-600 dark:text-red-400">
@@ -600,12 +602,28 @@ function Step5Confirm({
         </div>
       )}
 
+      {/* Soft warnings (e.g. exact full-row duplicates in sales_fact) */}
+      {validationResult.warnings.length > 0 && (
+        <div className="flex flex-col gap-1.5 rounded-xl border border-amber-500/25 bg-amber-500/6 p-4">
+          <p className="text-[12px] font-semibold text-amber-700 dark:text-amber-400">
+            {validationResult.warningCount} fila(s) con advertencia — se importarán igualmente:
+          </p>
+          <ul className="flex flex-col gap-1 text-[11px] text-amber-700/80 dark:text-amber-400/80">
+            {validationResult.warnings.slice(0, 8).map((w, i) => (
+              <li key={i}>Fila {w.row}: {w.message}</li>
+            ))}
+            {validationResult.warnings.length > 8 && (
+              <li>… y {validationResult.warnings.length - 8} advertencia(s) más.</li>
+            )}
+          </ul>
+        </div>
+      )}
+
       {validationResult.cleanCount === 0 ? (
         <ErrorBox message="No hay filas válidas para importar. Corrige los errores en tu archivo y vuelve a cargarlo." />
       ) : (
         <div className="rounded-xl border border-[var(--firplak-navy)]/20 bg-[var(--firplak-navy)]/5 px-5 py-4 text-[13px] text-[var(--firplak-navy)] dark:text-blue-300">
-          Se importarán <strong>{validationResult.cleanCount.toLocaleString()} filas</strong> en la tabla{" "}
-          <strong>{schema.table}</strong> usando upsert (sin duplicados por clave primaria).
+          Se importarán las filas válidas. Los duplicados exactos solo se marcarán como advertencia.
         </div>
       )}
 

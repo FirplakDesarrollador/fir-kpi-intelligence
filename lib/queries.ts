@@ -1,20 +1,16 @@
 import { supabase } from "@/lib/supabase"
 import type { DashboardFilters } from "@/lib/hooks/use-dashboard-filters"
+import { getSalesByMonth, type SalesMonth } from "@/lib/supabase/sales-fact"
 
 /**
  * Supabase query layer for the FIR-KPI dashboard.
  *
- * Each fetcher accepts an optional `DashboardFilters` argument and translates
- * the active filters into `.eq()` / date-range constraints on the underlying
- * Supabase view. The per-view `ViewSupport` map declares which filter keys
- * the view can honor — filters outside that set are silently ignored.
+ * Sales data (`fetchSalesMonthly`) is now fetched directly from `sales_fact`
+ * via lib/supabase/sales-fact.ts — no Supabase views required.
  *
- * Exact view schemas (single source of truth):
- *
- *   sales_kpi_monthly
- *     month, senior_seller, junior_seller, zone, territory, sales_type,
- *     customer_group, customer_subgroup, customer_segment, product_family,
- *     net_sales, total_quantity, total_cost, gross_profit, gross_margin
+ * Operational count fetchers (`fetchPendingOrders`, etc.) still query their
+ * respective Supabase views. A ViewSupport map controls which DashboardFilters
+ * keys each view honours.
  *
  *   orders_pending_kpi
  *     month, seller_name, customer_code, customer_name, customer_group,
@@ -29,58 +25,14 @@ import type { DashboardFilters } from "@/lib/hooks/use-dashboard-filters"
  *
  *   overdue_orders, blocked_orders, deliveries_with_issues,
  *   deliveries_pending_pod
- *     Treated as raw list/count views; the row count IS the KPI. Without a
- *     confirmed schema, no filters are applied to these four.
- *
- * Notes on `fetchSalesMonthly`:
- *   `sales_kpi_monthly` is granular by dimension, so we sum `net_sales` per
- *   `month` client-side. The schema has no `budget` column, so the budget
- *   series is synthesized from a 3-month trailing average × 1.08 — swap in a
- *   real budget view when one becomes available.
+ *     Treated as raw list/count views — row count IS the KPI. No filter
+ *     support until their column lists are confirmed.
  */
 
 // ---------- Public, normalized types --------------------------------------
 
-export type SalesMonth = {
-  /** YYYY-MM, normalized for stable sort + locale-agnostic labelling. */
-  month: string
-  /** Aggregated net_sales for the month, summed across dimensions. */
-  sales: number
-  /** Synthesized budget target — see header docblock. */
-  budget: number
-}
-
-// ---------- Helpers -------------------------------------------------------
-
-function toMonthKey(raw: string): string {
-  let m = /^(\d{4})-(\d{2})/.exec(raw)
-  if (m) return `${m[1]}-${m[2]}`
-  m = /^(\d{4})\/(\d{2})/.exec(raw)
-  if (m) return `${m[1]}-${m[2]}`
-  const d = new Date(raw)
-  if (!Number.isNaN(d.getTime())) {
-    const y = d.getUTCFullYear()
-    const mo = String(d.getUTCMonth() + 1).padStart(2, "0")
-    return `${y}-${mo}`
-  }
-  return raw
-}
-
-function asNumber(v: unknown): number {
-  if (typeof v === "number" && Number.isFinite(v)) return v
-  if (typeof v === "string" && v.trim() !== "") {
-    const n = Number(v)
-    if (Number.isFinite(n)) return n
-  }
-  return 0
-}
-
-function trailingAverage(values: number[], i: number, window = 3): number {
-  const start = Math.max(0, i - window)
-  const slice = values.slice(start, i)
-  if (slice.length === 0) return values[i] ?? 0
-  return slice.reduce((a, b) => a + b, 0) / slice.length
-}
+// Re-exported so existing consumers (sales-chart.tsx etc.) keep working.
+export type { SalesMonth } from "@/lib/supabase/sales-fact"
 
 /* ---------- Filter translation ---------- */
 
@@ -240,46 +192,16 @@ async function exactRowCount(
   return typeof count === "number" ? count : 0
 }
 
-// ---------- sales_kpi_monthly ---------------------------------------------
+// ---------- sales_fact (direct) -------------------------------------------
 
-type SalesAggRow = {
-  month: string | null
-  net_sales: number | string | null
-}
-
+/**
+ * Fetch monthly sales aggregates directly from `sales_fact`.
+ * Delegates to lib/supabase/sales-fact.ts — no Supabase view required.
+ */
 export async function fetchSalesMonthly(
   filters?: DashboardFilters
 ): Promise<SalesMonth[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let q: any = supabase
-    .from("sales_kpi_monthly")
-    .select("month, net_sales")
-  if (filters) q = applyFilters(q, filters, SUPPORT_SALES)
-
-  const { data, error } = await q
-  if (error) throw error
-  const rows = (data ?? []) as SalesAggRow[]
-  if (rows.length === 0) return []
-
-  // Aggregate per month (the view is granular by dimension).
-  const byMonth = new Map<string, number>()
-  for (const r of rows) {
-    if (!r.month) continue
-    const key = toMonthKey(String(r.month))
-    byMonth.set(key, (byMonth.get(key) ?? 0) + asNumber(r.net_sales))
-  }
-  if (byMonth.size === 0) return []
-
-  const sortedKeys = [...byMonth.keys()].sort()
-  const recent = sortedKeys.slice(-12)
-  const salesSeries = recent.map((k) => byMonth.get(k) ?? 0)
-
-  // Synthesize a budget target (see file header).
-  return recent.map((month, i) => {
-    const trail = trailingAverage(salesSeries, i, 3)
-    const budget = Math.round(trail * 1.08)
-    return { month, sales: salesSeries[i], budget }
-  })
+  return getSalesByMonth(filters)
 }
 
 // ---------- orders_pending_kpi --------------------------------------------

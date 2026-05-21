@@ -37,7 +37,7 @@ function trendFromDelta(delta: number, betterIsUp = true): KpiTrend {
   return (isUp === betterIsUp ? "up" : "down") as KpiTrend
 }
 
-/* ----------------------- elegant fallbacks ----------------- */
+/* ----------------------- card model ----------------------- */
 
 type CardModel = {
   label: string
@@ -45,55 +45,6 @@ type CardModel = {
   delta?: string
   trend?: KpiTrend
   hint?: string
-}
-
-/**
- * Mock fallbacks — used only when the corresponding Supabase view returns no
- * rows. Strings are localized through the dictionary.
- */
-const MOCK: Record<string, CardModel> = {
-  netSales: {
-    label: t.dashboard.cards.netSales,
-    value: "$1.42M",
-    delta: "+8.4%",
-    trend: "up",
-    hint: t.common.vsBudget,
-  },
-  attainment: {
-    label: t.dashboard.cards.attainment,
-    value: "103%",
-    delta: "+3.2 pts",
-    trend: "up",
-    hint: t.common.vsLastMonth,
-  },
-  pending: {
-    label: t.dashboard.cards.pending,
-    value: "284",
-    delta: "−12",
-    trend: "down",
-    hint: t.common.vsLastWeek,
-  },
-  overdue: {
-    label: t.dashboard.cards.overdue,
-    value: "38",
-    delta: "+5",
-    trend: "down",
-    hint: t.common.needsReview,
-  },
-  open: {
-    label: t.dashboard.cards.open,
-    value: "612",
-    delta: "+24",
-    trend: "up",
-    hint: t.common.inTransit,
-  },
-  pod: {
-    label: t.dashboard.cards.pod,
-    value: "47",
-    delta: "−3",
-    trend: "up",
-    hint: t.common.completionUp,
-  },
 }
 
 /* ----------------------- grid ------------------------------ */
@@ -133,7 +84,9 @@ export function DashboardKpiGrid({ filters }: DashboardKpiGridProps) {
   /* Net sales (MTD) + attainment derived from sales_kpi_monthly */
   const netSalesModel: CardModel = React.useMemo(() => {
     const rows = sales.data ?? []
-    if (rows.length === 0) return MOCK.netSales
+    if (rows.length === 0) {
+      return { label: t.dashboard.cards.netSales, value: "—", trend: "flat", hint: t.common.vsBudget }
+    }
     const last = rows[rows.length - 1]
     const prev = rows.length > 1 ? rows[rows.length - 2] : undefined
     const value = compactCurrency(last.sales)
@@ -159,10 +112,14 @@ export function DashboardKpiGrid({ filters }: DashboardKpiGridProps) {
 
   const attainmentModel: CardModel = React.useMemo(() => {
     const rows = sales.data ?? []
-    if (rows.length === 0) return MOCK.attainment
+    if (rows.length === 0) {
+      return { label: t.dashboard.cards.attainment, value: "—", trend: "flat", hint: t.common.currentMonth }
+    }
     const last = rows[rows.length - 1]
     const prev = rows.length > 1 ? rows[rows.length - 2] : undefined
-    if (last.budget <= 0) return MOCK.attainment
+    if (last.budget <= 0) {
+      return { label: t.dashboard.cards.attainment, value: "—", trend: "flat", hint: t.common.currentMonth }
+    }
     const lastPct = (last.sales / last.budget) * 100
     if (!prev || prev.budget <= 0) {
       return {
@@ -184,7 +141,9 @@ export function DashboardKpiGrid({ filters }: DashboardKpiGridProps) {
   }, [sales.data])
 
   const pendingModel: CardModel = React.useMemo(() => {
-    if (pending.data == null) return MOCK.pending
+    if (pending.data == null) {
+      return { label: t.dashboard.cards.pending, value: "—" }
+    }
     return {
       label: t.dashboard.cards.pending,
       value: pending.data.toLocaleString(),
@@ -193,7 +152,9 @@ export function DashboardKpiGrid({ filters }: DashboardKpiGridProps) {
   }, [pending.data])
 
   const overdueModel: CardModel = React.useMemo(() => {
-    if (overdue.data == null) return MOCK.overdue
+    if (overdue.data == null) {
+      return { label: t.dashboard.cards.overdue, value: "—" }
+    }
     return {
       label: t.dashboard.cards.overdue,
       value: overdue.data.toLocaleString(),
@@ -203,7 +164,9 @@ export function DashboardKpiGrid({ filters }: DashboardKpiGridProps) {
   }, [overdue.data])
 
   const openModel: CardModel = React.useMemo(() => {
-    if (openDel.data == null) return MOCK.open
+    if (openDel.data == null) {
+      return { label: t.dashboard.cards.open, value: "—" }
+    }
     return {
       label: t.dashboard.cards.open,
       value: openDel.data.toLocaleString(),
@@ -212,7 +175,9 @@ export function DashboardKpiGrid({ filters }: DashboardKpiGridProps) {
   }, [openDel.data])
 
   const podModel: CardModel = React.useMemo(() => {
-    if (pod.data == null) return MOCK.pod
+    if (pod.data == null) {
+      return { label: t.dashboard.cards.pod, value: "—" }
+    }
     return {
       label: t.dashboard.cards.pod,
       value: pod.data.toLocaleString(),
