@@ -42,7 +42,20 @@ type PageContent = {
   }
 }
 
+type AuthMessages = {
+  loginTitle: string
+  loginSubtitle: string
+  emailLabel: string
+  emailPlaceholder: string
+  passwordLabel: string
+  passwordPlaceholder: string
+  loginButton: string
+  loggingIn: string
+  logoutButton: string
+}
+
 type Messages = {
+  auth: AuthMessages
   brand: { name: string; tagline: string; fullName: string }
   nav: {
     ariaPrimary: string
@@ -159,6 +172,17 @@ type FilterMessages = {
 }
 
 const es: Messages = {
+  auth: {
+    loginTitle: "Iniciar sesión",
+    loginSubtitle: "Ingresa tus credenciales para acceder a la plataforma.",
+    emailLabel: "Correo electrónico",
+    emailPlaceholder: "tu@firplak.com",
+    passwordLabel: "Contraseña",
+    passwordPlaceholder: "••••••••",
+    loginButton: "Iniciar sesión",
+    loggingIn: "Ingresando…",
+    logoutButton: "Cerrar sesión",
+  },
   brand: {
     name: "FIR-KPI",
     tagline: "Inteligencia",
@@ -483,6 +507,17 @@ const es: Messages = {
  * can swap locales without redesign. Not yet wired to a locale switcher.
  */
 const en: Messages = {
+  auth: {
+    loginTitle: "Sign in",
+    loginSubtitle: "Enter your credentials to access the platform.",
+    emailLabel: "Email address",
+    emailPlaceholder: "you@firplak.com",
+    passwordLabel: "Password",
+    passwordPlaceholder: "••••••••",
+    loginButton: "Sign in",
+    loggingIn: "Signing in…",
+    logoutButton: "Sign out",
+  },
   brand: {
     name: "FIR-KPI",
     tagline: "Intelligence",
