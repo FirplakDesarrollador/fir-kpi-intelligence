@@ -52,13 +52,20 @@ export async function importRows(
   const batchErrors: string[] = []
   let insertedCount = 0
 
+  // Build the allow-list of valid column keys from the schema once per import.
+  const validKeys = new Set(schema.fields.map((f) => f.key))
+
   for (let offset = 0; offset < rows.length; offset += BATCH_SIZE) {
     const batch = rows.slice(offset, offset + BATCH_SIZE)
 
-    // Strip null values so Supabase uses column defaults
+    // 1. Strip null/empty values so Supabase uses column defaults.
+    // 2. Sanitize: remove any key not declared in the schema so legacy or
+    //    renamed columns (e.g. "channel") never reach the database.
     const cleaned = batch.map((row) =>
       Object.fromEntries(
-        Object.entries(row).filter(([, v]) => v !== null && v !== undefined && v !== "")
+        Object.entries(row).filter(
+          ([k, v]) => validKeys.has(k) && v !== null && v !== undefined && v !== ""
+        )
       )
     )
 

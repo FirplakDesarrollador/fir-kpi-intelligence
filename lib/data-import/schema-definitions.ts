@@ -33,6 +33,13 @@ export type TableSchema = {
   description: string
   /** Column definitions in the order they appear in the template. */
   fields: FieldDef[]
+  /**
+   * Legacy / renamed column aliases.
+   * Maps an old header name (label or key) → current field key.
+   * Used by the file-parser to accept files generated with an older template.
+   * These headers are never written to new templates.
+   */
+  columnAliases?: Record<string, string>
 }
 
 // ---------------------------------------------------------------------------
@@ -54,7 +61,6 @@ const salesFactSchema: TableSchema = {
     { key: "destination_city",   label: "Ciudad destino",            type: "string",  required: false, example: "Bogotá" },
     { key: "zone",               label: "Zona",                      type: "string",  required: false, example: "Centro" },
     { key: "territory",          label: "Territorio",                type: "string",  required: false, example: "Cundinamarca" },
-    { key: "channel",            label: "Canal",                     type: "string",  required: false, example: "Distribuidores" },
     { key: "sales_type",         label: "Tipo de venta",             type: "string",  required: false, example: "Directa" },
     { key: "senior_seller",      label: "Vendedor principal",        type: "string",  required: false, example: "María López" },
     { key: "junior_seller",      label: "Vendedor junior",           type: "string",  required: false, example: "Carlos Ruiz" },
@@ -82,6 +88,12 @@ const salesFactSchema: TableSchema = {
     { key: "profit_center",      label: "Centro de beneficio",       type: "string",  required: false, example: "PC01" },
     { key: "reference",          label: "Referencia",                type: "string",  required: false, example: "OC-4521" },
   ],
+  // Files exported before sales_type was introduced used "channel" / "Canal".
+  // Map both so legacy uploads still parse correctly; neither is sent to Supabase.
+  columnAliases: {
+    channel: "sales_type",
+    Canal:   "sales_type",
+  },
 }
 
 // ---------------------------------------------------------------------------
